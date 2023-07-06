@@ -1,1 +1,77 @@
+package com.bookmyshow.qa.test;
 
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WindowType;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class BMSTest {
+	WebDriver driver;
+
+	@Test
+	public void validatingHiGuestOnBMS() {
+		driver = new ChromeDriver();
+		driver.get("https://in.bookmyshow.com/explore/home"); // URL
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(6));
+		driver.manage().window().maximize();
+		driver.findElement(By.xpath("//ul[@class='sc-eNPDpu gBUach']//li[3]/div")).click(); // selecting Bangluru City
+		driver.findElement(By.xpath("//div[text()='Sign in']")).click(); // Clicking on Sign In Button
+		driver.findElement(By.xpath("(//div[@class='sc-RefOD iCukgs'])[2]")).click(); // Clicking on Countinue with
+																						// Email
+
+		driver.findElement(By.id("emailId")).sendKeys("selauto@yopmail.com"); // Adding as Input EmailID
+		driver.findElement(By.xpath("//button[text()='Continue']")).click(); // Clicking on Countinue Button
+		String BMSHandle = driver.getWindowHandle();
+
+		// opening new tab
+		driver.switchTo().newWindow(WindowType.TAB);
+
+		// opeing yopmail.com
+		driver.get("https://yopmail.com");
+		driver.findElement(By.id("login")).sendKeys("selauto@yopmail.com", Keys.ENTER);
+
+		// Providing Sleep so that there is enough time to get otp
+		try {
+			Thread.sleep(8000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		driver.findElement(By.id("refresh")).click(); // refresh button
+
+		// switching to iframe within which element is present
+		driver.switchTo().frame("ifmail");
+
+		// storing OTP in String
+		String otp = driver.findElement(By.xpath(
+				"//div[@id=\"mail\"]//div/table/tbody/tr[1]/td/div/table/tbody/tr[4]/td/table/tbody/tr[2]/td/table/tbody/tr/td"))
+				.getText();
+
+		System.out.println(otp); // printing OTP
+
+		// Switching Back to BookMyShow.com
+		driver.switchTo().window(BMSHandle);
+
+		// sending otp to enter otp input
+		driver.findElement(By.xpath("(//div[@class='sc-gZMcBi sc-jzgbtB grnTcO']/input)[1]")).sendKeys(otp);
+
+		// clicking on continue button
+		driver.findElement(By.xpath("//button[text()='Continue']")).click();
+
+		try {
+			WebElement HiGuest = driver.findElement(By.xpath("//span[text()='Guest']")); // Hi, Guest WebElement
+
+			// Hard Assertion for validating Hi, Guest is Displayed or not.
+
+			Assert.assertTrue(HiGuest.isDisplayed());
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("OTP did not recieved in just time.");
+		}
+	}
+}
