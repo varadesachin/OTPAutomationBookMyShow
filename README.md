@@ -1,4 +1,4 @@
-Summary : Above code reads the otp send by Website to an temporary email servive Yopmail.
+Summary : Above code reads the otp sent by Website to an temporary email service Yopmail.
 Technology used : Java, Selenium
 
 
